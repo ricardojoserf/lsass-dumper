@@ -174,7 +174,13 @@ int main() {
 	HANDLE outFile = CreateFile(pointer_filename, GENERIC_ALL, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	// Enable SeDebugPrivilege privilege
-	SetPrivilege();
+	BOOL privAdded = SetPrivilege();
+	if (privAdded) {
+		wcout << "[+] Success: Privilege added correctly." << endl;
+	}
+	else {
+		wcout << "[-] Error: Privilege could not be added." << endl;
+	}
 
 	// Create handle to the process
 	DWORD processRights = PROCESS_VM_READ | PROCESS_QUERY_INFORMATION; // PROCESS_ALL_ACCESS;
