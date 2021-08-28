@@ -1,4 +1,4 @@
-# Dumping Lsass with C++ (and style)
+# Customizing Lsass Dumps with C++
 
 Dumping the Lsass process to get the passwords stored in memory in a Windows machine is one of the most common uses of Mimikatz. However, there are stealthier methods to do this, such as using custom code. Doing so, we can customize the dump file name, using the hostname and date as name and harmless extensions such as ".txt" instead of ".dmp".
 
